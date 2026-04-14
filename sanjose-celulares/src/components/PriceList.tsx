@@ -2,8 +2,8 @@
 
 import { motion } from "framer-motion";
 import { useInView } from "framer-motion";
-import { useRef, useState } from "react";
-import { MessageCircle, Sparkles, Tag } from "lucide-react";
+import { useRef, useState, useEffect } from "react";
+import { MessageCircle, Sparkles, Tag, Loader2 } from "lucide-react";
 
 interface Product {
   name: string;
@@ -12,61 +12,122 @@ interface Product {
   category: string;
 }
 
-const priceData: Product[] = [
-  // iPhone
-  { name: "iPhone 13 128GB", condition: "IMPECABLE", price: "$571.100", category: "iPhone" },
-  { name: "iPhone 14 128GB", condition: "IMPECABLE", price: "$631.400", category: "iPhone" },
-  { name: "iPhone 14 256GB", condition: "IMPECABLE", price: "$663.000", category: "iPhone" },
-  { name: "iPhone 14 Plus 128GB", condition: "IMPECABLE", price: "$789.300", category: "iPhone" },
-  { name: "iPhone 15 Pro Max 256GB", condition: "IMPECABLE", price: "$1.136.500", category: "iPhone" },
-
-  // Samsung
-  { name: "Samsung Galaxy A06 128GB", condition: "NUEVO", price: "$196.600", category: "Samsung" },
-  { name: "Samsung Galaxy A15 128GB", condition: "IMPECABLE", price: "$189.400", category: "Samsung" },
-  { name: "Samsung Galaxy A16 128GB", condition: "IMPECABLE", price: "$205.200", category: "Samsung" },
-  { name: "Samsung Galaxy A17 128GB", condition: "NUEVO", price: "$284.100", category: "Samsung" },
-  { name: "Samsung Galaxy A17 128GB", condition: "IMPECABLE", price: "$236.800", category: "Samsung" },
-  { name: "Samsung Galaxy A24 128GB", condition: "IMPECABLE", price: "$221.000", category: "Samsung" },
-  { name: "Samsung Galaxy A26 128GB", condition: "IMPECABLE", price: "$252.600", category: "Samsung" },
-  { name: "Samsung Galaxy A26 256GB", condition: "IMPECABLE", price: "$299.900", category: "Samsung" },
-  { name: "Samsung Galaxy A34 128GB", condition: "IMPECABLE", price: "$236.800", category: "Samsung" },
-  { name: "Samsung Galaxy A35 128GB", condition: "IMPECABLE", price: "$268.300", category: "Samsung" },
-  { name: "Samsung Galaxy A52 128GB", condition: "IMPECABLE", price: "$189.400", category: "Samsung" },
-
-  // Motorola
-  { name: "Moto G35 128GB", condition: "NUEVO", price: "$315.700", category: "Motorola" },
-  { name: "Moto G24 Power 256GB", condition: "IMPECABLE", price: "$189.400", category: "Motorola" },
-  { name: "Moto G34 256GB", condition: "IMPECABLE", price: "$205.200", category: "Motorola" },
-
-  // Xiaomi / Honor
-  { name: "Xiaomi Note 13 256GB", condition: "IMPECABLE", price: "$221.000", category: "Xiaomi/Honor" },
-  { name: "Honor 400 Lite 256GB", condition: "IMPECABLE", price: "$330.100", category: "Xiaomi/Honor" },
-
-  // Apple Watch
-  { name: "Apple Watch SE 40mm", condition: "IMPECABLE", price: "$390.000", category: "Apple Watch" },
-  { name: "Apple Watch Serie 8 45mm", condition: "IMPECABLE", price: "$434.000", category: "Apple Watch" },
-  { name: "Apple Watch Ultra 49mm", condition: "IMPECABLE", price: "$789.300", category: "Apple Watch" },
-
-  // MacBook
-  { name: "MacBook Pro M1 256GB 13.3\"", condition: "IMPECABLE", price: "$1.105.000", category: "MacBook" },
-
-  // Accesorios
-  { name: "Cabezal Apple 20W", condition: "NUEVO", price: "$54.500", category: "Accesorios" },
-  { name: "Cabezal Spigen 20W", condition: "NUEVO", price: "$38.700", category: "Accesorios" },
-  { name: "Cable USB-C a USB-C 2M Anker", condition: "NUEVO", price: "$33.000", category: "Accesorios" },
-  { name: "Cable USB-C a Lightning Apple", condition: "NUEVO", price: "$54.500", category: "Accesorios" },
-  { name: "Powerbank Anker 5000mAh", condition: "NUEVO", price: "$64.700", category: "Accesorios" },
-  { name: "JBL Tune Flex", condition: "NUEVO", price: "$97.000", category: "Accesorios" },
-  { name: "Philips Series 4000", condition: "NUEVO", price: "$58.000", category: "Accesorios" },
-  { name: "Roku Express HD", condition: "NUEVO", price: "$55.000", category: "Accesorios" },
-];
-
-const categories = ["Todos", "iPhone", "Samsung", "Motorola", "Xiaomi/Honor", "Apple Watch", "MacBook", "Accesorios"];
-
 export default function PriceList() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
   const [activeCategory, setActiveCategory] = useState("Todos");
+  const [priceData, setPriceData] = useState<Product[]>([]);
+  const [categories, setCategories] = useState<string[]>(["Todos"]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      try {
+        const response = await fetch(
+          `https://docs.google.com/spreadsheets/d/1bE2Y0FgTQc5w1n9cBeypLSuqxyjvxuKg7fFVyTMSV_k/export?format=csv&t=${new Date().getTime()}`,
+          { cache: "no-store" }
+        );
+        const text = await response.text();
+        
+        // Simple CSV Parser
+        const parseCSV = (str: string) => {
+          const arr: string[][] = [];
+          let quote = false;
+          for (let row = 0, col = 0, c = 0; c < str.length; c++) {
+            let cc = str[c], nc = str[c + 1];
+            arr[row] = arr[row] || [];
+            arr[row][col] = arr[row][col] || '';
+
+            if (cc == '"' && quote && nc == '"') { arr[row][col] += cc; ++c; continue; }
+            if (cc == '"') { quote = !quote; continue; }
+            if (cc == ',' && !quote) { ++col; continue; }
+            if (cc == '\r' && nc == '\n' && !quote) { ++row; col = 0; ++c; continue; }
+            if (cc == '\n' && !quote) { ++row; col = 0; continue; }
+            if (cc == '\r' && !quote) { ++row; col = 0; continue; }
+
+            arr[row][col] += cc;
+          }
+          return arr;
+        };
+
+        const rows = parseCSV(text);
+        const parsedProducts: Product[] = [];
+        let currentCategory = "Otros";
+
+        rows.forEach((cols) => {
+          if (!cols || !cols[0] || cols[0].trim() === "") return;
+
+          const name = cols[0].trim();
+          const condition = cols[1] ? cols[1].trim() : null;
+
+          let priceVal = null;
+          if (cols[2] && cols[2].trim() !== "") priceVal = cols[2].trim();
+          else if (cols[3] && cols[3].trim() !== "") priceVal = cols[3].trim();
+
+          if (!condition && priceVal === null) {
+            if (
+              !name.toLowerCase().includes("whatsaap") &&
+              !name.toLowerCase().includes("lista de iphone")
+            ) {
+              let catName = name.toUpperCase();
+              if (catName.includes("VARIOS APPLE")) catName = "APPLE WATCH";
+              if (catName.includes("CABLES")) catName = "ACCESORIOS";
+              currentCategory = catName;
+            }
+          } else if (name && !name.toLowerCase().includes("whatsaap")) {
+            let finalPrice = "Consultar";
+            if (priceVal !== null) {
+              if (priceVal.includes("$")) {
+                finalPrice = priceVal.replace(/\s+/g, "");
+              } else {
+                let parseNum = Number(priceVal.replace(/[^\d.-]/g, ''));
+                if (!isNaN(parseNum)) {
+                  const formattedPrice = new Intl.NumberFormat("es-AR", {
+                    style: "currency",
+                    currency: "ARS",
+                    maximumFractionDigits: 0,
+                  }).format(parseNum);
+                  finalPrice = formattedPrice.replace(/\s+/g, "").replace(",00", "");
+                } else {
+                  finalPrice = priceVal;
+                }
+              }
+            }
+            
+            // Skip invalid or placeholder products hidden in the sheet with 0 price
+            if (finalPrice === "$0" || finalPrice === "0" || finalPrice === "$0.00" || finalPrice === "$0,00" || finalPrice === "$-") {
+               return; 
+            }
+
+            const cleanedCondition = (condition || "NUEVO").replace(/\n/g, " ").trim();
+
+            let itemCat = currentCategory;
+            if (name.toLowerCase().includes("apple watch") || name.toLowerCase().includes("malla")) {
+               itemCat = "APPLE WATCH";
+            }
+
+            parsedProducts.push({
+              name: name,
+              condition: cleanedCondition,
+              price: finalPrice,
+              category: itemCat,
+            });
+          }
+        });
+
+        setPriceData(parsedProducts);
+        
+        const fetchedCategories = Array.from(new Set(parsedProducts.map((p) => p.category)));
+        setCategories(["Todos", ...fetchedCategories]);
+      } catch (error) {
+        console.error("Error fetching prices:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPrices();
+  }, []);
 
   const filtered =
     activeCategory === "Todos"
@@ -128,59 +189,74 @@ export default function PriceList() {
         </motion.div>
 
         {/* Price cards grid */}
-        <motion.div
-          layout
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
-        >
-          {filtered.map((product, i) => (
-            <motion.div
-              key={`${product.name}-${i}`}
-              layout
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={isInView ? { opacity: 1, scale: 1 } : {}}
-              transition={{ duration: 0.4, delay: i * 0.03 }}
-              className="group relative p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-brand-pink/30 transition-all duration-300 hover:bg-white/10"
-            >
-              {/* Condition badge */}
-              <div
-                className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold mb-3 ${
-                  product.condition === "NUEVO"
-                    ? "bg-green-500/20 text-green-400"
-                    : "bg-brand-pink/20 text-brand-pink"
-                }`}
+        {loading ? (
+          <div className="flex flex-col items-center justify-center py-20 text-brand-pink w-full">
+            <Loader2 className="w-12 h-12 animate-spin mb-4" />
+            <p className="text-white/60">Actualizando precios en tiempo real...</p>
+          </div>
+        ) : (
+          <motion.div
+            layout
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"
+          >
+            {filtered.map((product, i) => (
+              <motion.div
+                key={`${product.name}-${i}`}
+                layout
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={isInView ? { opacity: 1, scale: 1 } : {}}
+                transition={{ duration: 0.4, delay: i * 0.03 }}
+                className="group relative p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-brand-pink/30 transition-all duration-300 hover:bg-white/10"
               >
-                <Sparkles size={10} />
-                {product.condition}
-              </div>
-
-              <h3 className="font-semibold text-white/90 text-sm leading-snug mb-2 group-hover:text-brand-pink transition-colors">
-                {product.name}
-              </h3>
-
-              <div className="flex items-center justify-between">
-                <span className="text-xl font-bold text-white">
-                  {product.price}
-                </span>
-                <a
-                  href={`https://wa.me/5492616928222?text=Hola! Me interesa el ${encodeURIComponent(product.name)} a ${encodeURIComponent(product.price)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 rounded-full bg-brand-pink/20 text-brand-pink hover:bg-brand-pink hover:text-white transition-all duration-300"
+                {/* Condition badge */}
+                <div
+                  className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold mb-3 ${
+                    product.condition.toUpperCase() === "NUEVO"
+                      ? "bg-green-500/20 text-green-400"
+                      : "bg-brand-pink/20 text-brand-pink"
+                  }`}
                 >
-                  <MessageCircle size={16} />
-                </a>
-              </div>
-            </motion.div>
-          ))}
-        </motion.div>
+                  <Sparkles size={10} />
+                  {product.condition}
+                </div>
+
+                <h3 className="font-semibold text-white/90 text-sm leading-snug mb-2 group-hover:text-brand-pink transition-colors">
+                  {product.name}
+                </h3>
+
+                <div className="flex items-center justify-between mt-4">
+                  <span className="text-xl font-bold text-white">
+                    {product.price}
+                  </span>
+                  <a
+                    href={`https://wa.me/5492616928222?text=Hola! Me interesa el ${encodeURIComponent(product.name)} a ${encodeURIComponent(product.price)}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-full bg-brand-pink/20 text-brand-pink hover:bg-brand-pink hover:text-white transition-all duration-300"
+                  >
+                    <MessageCircle size={16} />
+                  </a>
+                </div>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
 
         {/* CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={isInView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.5 }}
-          className="text-center mt-12"
+          className="text-center mt-12 w-full flex flex-col items-center"
         >
+          {/* Discount Disclaimer */}
+          <div className="mb-10 p-5 rounded-xl bg-white/5 border border-brand-pink/20 inline-block max-w-2xl text-center shadow-lg shadow-brand-pink/5">
+            <p className="text-white/80 text-sm md:text-base leading-relaxed">
+              <span className="text-brand-pink font-bold text-lg mr-2">*</span>
+              Toda la lista cuenta con un <strong className="text-brand-pink font-bold">10% de descuento adicional</strong> pagando en efectivo o transferencia (aplica a productos seleccionados).
+            </p>
+          </div>
+
           <p className="text-white/40 text-sm mb-4">
             ¿No encontrás lo que buscás? Tenemos más modelos disponibles.
           </p>
