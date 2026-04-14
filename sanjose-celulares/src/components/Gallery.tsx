@@ -63,7 +63,7 @@ export default function Gallery() {
             Galería
           </span>
           <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-brand-black">
-            Seguinos en <span className="gradient-text">InstagramIcon</span>
+            Seguinos en <span className="gradient-text">Instagram</span>
           </h2>
           <p className="mt-4 text-brand-black/50 text-lg max-w-2xl mx-auto">
             Descubrí nuestros productos, ofertas y novedades en @sj.celulares
@@ -132,7 +132,7 @@ export default function Gallery() {
             className="inline-flex items-center gap-2 px-8 py-3 rounded-full border-2 border-brand-pink text-brand-pink font-semibold hover:bg-brand-pink hover:text-white transition-all duration-300 hover:scale-105"
           >
             <InstagramIcon size={18} />
-            Seguir en InstagramIcon
+            Seguir en Instagram
             <ExternalLink size={14} />
           </a>
         </motion.div>
