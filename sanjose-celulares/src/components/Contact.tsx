@@ -62,6 +62,9 @@ export default function Contact() {
                 <div>
                   <p className="text-white/40 text-sm">Ubicación</p>
                   <p className="text-white font-semibold">
+                    Godoy Cruz 1124, San José, Guaymallén
+                  </p>
+                  <p className="text-white/40 text-sm">
                     Mendoza, Argentina
                   </p>
                 </div>
@@ -174,6 +177,44 @@ export default function Contact() {
             </div>
           </motion.div>
         </div>
+
+        {/* Google Maps Embed */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={isInView ? { opacity: 1, y: 0 } : {}}
+          transition={{ duration: 0.7, delay: 0.4 }}
+          className="mt-16"
+        >
+          <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-brand-pink/5">
+            {/* Map glow decoration */}
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-96 h-20 bg-brand-pink/10 rounded-full blur-3xl pointer-events-none" />
+            
+            <div className="relative">
+              {/* Header bar */}
+              <div className="flex items-center gap-3 px-5 py-3 bg-white/5 border-b border-white/10">
+                <div className="w-8 h-8 rounded-lg bg-brand-pink/20 flex items-center justify-center">
+                  <MapPin size={16} className="text-brand-pink" />
+                </div>
+                <div>
+                  <p className="text-white text-sm font-semibold">Nuestra ubicación</p>
+                  <p className="text-white/40 text-xs">Godoy Cruz 1124, San José, Guaymallén, Mendoza</p>
+                </div>
+              </div>
+
+              {/* Map iframe */}
+              <iframe
+                src="https://www.google.com/maps?q=Godoy+Cruz+1124,+Villa+Nueva+de+Guaymallén,+Mendoza,+Argentina&output=embed"
+                width="100%"
+                height="400"
+                style={{ border: 0, filter: "invert(90%) hue-rotate(180deg) brightness(0.95) contrast(0.9)" }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Ubicación San José Celulares - Godoy Cruz 1124, Guaymallén, Mendoza"
+              />
+            </div>
+          </div>
+        </motion.div>
       </div>
     </section>
   );
