@@ -15,6 +15,21 @@ interface Product {
 
 const ITEMS_PER_PAGE = 12;
 
+/**
+ * Converts a Google Drive sharing link to a direct thumbnail URL.
+ * Input:  https://drive.google.com/file/d/FILE_ID/view?usp=drive_link
+ * Output: https://drive.google.com/thumbnail?id=FILE_ID&sz=w800
+ */
+function driveUrlToThumbnail(url: string): string {
+  if (!url) return "";
+  const match = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  if (match) {
+    return `https://drive.google.com/thumbnail?id=${match[1]}&sz=w800`;
+  }
+  // Already a direct URL or unknown format — return as-is
+  return url;
+}
+
 export default function PriceList() {
   const ref = useRef(null);
   const isInView = useInView(ref, { once: true, margin: "-100px" });
@@ -32,7 +47,7 @@ export default function PriceList() {
           { cache: "no-store" }
         );
         const text = await response.text();
-        
+
         // Simple CSV Parser
         const parseCSV = (str: string) => {
           const arr: string[][] = [];
@@ -100,17 +115,17 @@ export default function PriceList() {
                 }
               }
             }
-            
+
             // Skip invalid or placeholder products hidden in the sheet with 0 price
             if (finalPrice === "$0" || finalPrice === "0" || finalPrice === "$0.00" || finalPrice === "$0,00" || finalPrice === "$-") {
-               return; 
+              return;
             }
 
             const cleanedCondition = (condition || "NUEVO").replace(/\n/g, " ").trim();
 
             let itemCat = currentCategory;
             if (name.toLowerCase().includes("apple watch") || name.toLowerCase().includes("malla")) {
-               itemCat = "APPLE WATCH";
+              itemCat = "APPLE WATCH";
             }
 
             parsedProducts.push({
@@ -118,13 +133,13 @@ export default function PriceList() {
               condition: cleanedCondition,
               price: finalPrice,
               category: itemCat,
-              image: imageUrl,
+              image: driveUrlToThumbnail(imageUrl),
             });
           }
         });
 
         setPriceData(parsedProducts);
-        
+
         const fetchedCategories = Array.from(new Set(parsedProducts.map((p) => p.category)));
         setCategories(["Todos", ...fetchedCategories]);
       } catch (error) {
@@ -226,16 +241,37 @@ export default function PriceList() {
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                activeCategory === cat
+              className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${activeCategory === cat
                   ? "bg-brand-pink text-white shadow-lg shadow-brand-pink/30"
                   : "bg-white/5 text-white/60 hover:bg-white/10 hover:text-white"
-              }`}
+                }`}
             >
               {cat}
             </button>
           ))}
         </motion.div>
+
+        {/* Discount Disclaimer — shown prominently before the products */}
+        {!loading && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.25 }}
+            className="mb-10"
+          >
+            <div className="relative p-6 sm:p-8 rounded-2xl bg-gradient-to-r from-brand-pink/10 via-white/[0.06] to-brand-pink/10 border border-brand-pink/25 max-w-4xl mx-auto text-center shadow-lg shadow-brand-pink/10 overflow-hidden">
+              {/* Decorative accent */}
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-brand-pink to-transparent" />
+              <p className="text-white/90 text-base sm:text-lg md:text-xl leading-relaxed">
+                <span className="text-brand-pink font-bold text-2xl sm:text-3xl mr-2 align-middle">✦</span>
+                Toda la lista cuenta con un{" "}
+                <strong className="text-brand-pink font-extrabold text-lg sm:text-xl md:text-2xl">10% de descuento adicional</strong>{" "}
+                pagando en <strong className="text-white font-bold">efectivo o transferencia</strong>
+                <span className="block sm:inline text-white/50 text-sm sm:text-base mt-1 sm:mt-0 sm:ml-1">(aplica a productos seleccionados)</span>
+              </p>
+            </div>
+          </motion.div>
+        )}
 
         {/* Results count & page info */}
         {!loading && (
@@ -278,7 +314,7 @@ export default function PriceList() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.35, delay: i * 0.04 }}
-                  className="group relative rounded-2xl bg-white/[0.04] border border-white/[0.06] hover:border-brand-pink/40 transition-all duration-400 hover:bg-white/[0.08] overflow-hidden hover:shadow-[0_8px_30px_rgba(232,37,167,0.12)]"
+                  className="group relative rounded-2xl bg-white/[0.04] border border-white/[0.06] transition-all duration-400 overflow-hidden price-card-hover"
                 >
                   {/* Product image area */}
                   <div className="relative w-full aspect-[4/3] bg-gradient-to-br from-white/[0.03] to-white/[0.01] overflow-hidden">
@@ -296,9 +332,8 @@ export default function PriceList() {
                       />
                     ) : null}
                     <div
-                      className={`absolute inset-0 flex flex-col items-center justify-center text-white/15 ${
-                        product.image ? "hidden" : "flex"
-                      }`}
+                      className={`absolute inset-0 flex flex-col items-center justify-center text-white/15 ${product.image ? "hidden" : "flex"
+                        }`}
                     >
                       <ImageIcon size={48} strokeWidth={1} />
                       <span className="text-xs mt-2 text-white/10">Sin imagen</span>
@@ -314,11 +349,10 @@ export default function PriceList() {
                     {/* Condition badge overlay */}
                     <div className="absolute top-3 right-3">
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm ${
-                          product.condition.toUpperCase() === "NUEVO"
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm ${product.condition.toUpperCase() === "NUEVO"
                             ? "bg-green-500/20 text-green-400 border border-green-500/20"
                             : "bg-brand-pink/20 text-brand-pink border border-brand-pink/20"
-                        }`}
+                          }`}
                       >
                         <Sparkles size={10} />
                         {product.condition}
@@ -370,11 +404,10 @@ export default function PriceList() {
             <button
               onClick={() => goToPage(currentPage - 1)}
               disabled={currentPage === 1}
-              className={`flex items-center gap-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
-                currentPage === 1
+              className={`flex items-center gap-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${currentPage === 1
                   ? "bg-white/5 text-white/20 cursor-not-allowed"
                   : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
-              }`}
+                }`}
             >
               <ChevronLeft size={16} />
               <span className="hidden sm:inline">Anterior</span>
@@ -391,11 +424,10 @@ export default function PriceList() {
                   <button
                     key={page}
                     onClick={() => goToPage(page)}
-                    className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all duration-300 ${
-                      currentPage === page
+                    className={`w-10 h-10 rounded-xl text-sm font-semibold transition-all duration-300 ${currentPage === page
                         ? "bg-brand-pink text-white shadow-lg shadow-brand-pink/30 scale-110"
                         : "bg-white/5 text-white/50 hover:bg-white/10 hover:text-white"
-                    }`}
+                      }`}
                   >
                     {page}
                   </button>
@@ -407,11 +439,10 @@ export default function PriceList() {
             <button
               onClick={() => goToPage(currentPage + 1)}
               disabled={currentPage === totalPages}
-              className={`flex items-center gap-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${
-                currentPage === totalPages
+              className={`flex items-center gap-1 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-300 ${currentPage === totalPages
                   ? "bg-white/5 text-white/20 cursor-not-allowed"
                   : "bg-white/5 text-white/70 hover:bg-white/10 hover:text-white"
-              }`}
+                }`}
             >
               <span className="hidden sm:inline">Siguiente</span>
               <ChevronRight size={16} />
@@ -426,13 +457,7 @@ export default function PriceList() {
           transition={{ duration: 0.6, delay: 0.5 }}
           className="text-center mt-12 w-full flex flex-col items-center"
         >
-          {/* Discount Disclaimer */}
-          <div className="mb-10 p-5 rounded-xl bg-white/5 border border-brand-pink/20 inline-block max-w-2xl text-center shadow-lg shadow-brand-pink/5">
-            <p className="text-white/80 text-sm md:text-base leading-relaxed">
-              <span className="text-brand-pink font-bold text-lg mr-2">*</span>
-              Toda la lista cuenta con un <strong className="text-brand-pink font-bold">10% de descuento adicional</strong> pagando en efectivo o transferencia (aplica a productos seleccionados).
-            </p>
-          </div>
+
 
           <p className="text-white/40 text-sm mb-4">
             ¿No encontrás lo que buscás? Tenemos más modelos disponibles.

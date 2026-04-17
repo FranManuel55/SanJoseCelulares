@@ -126,14 +126,35 @@ body {
   animation: shimmer 3s infinite;
 }
 
-/* Card hover effect */
+/* Card hover effect — only on devices with hover support */
 .card-hover {
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.card-hover:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 20px 40px rgba(232, 37, 167, 0.15), 0 0 0 1px rgba(232, 37, 167, 0.2);
+@media (hover: hover) {
+  .card-hover:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 40px rgba(232, 37, 167, 0.15), 0 0 0 1px rgba(232, 37, 167, 0.2);
+  }
+}
+
+/* Gallery hover effects — desktop only */
+@media (hover: hover) {
+  .group:hover .gallery-img-hover {
+    transform: scale(1.1);
+  }
+  .group:hover .gallery-overlay-hover {
+    opacity: 1;
+  }
+}
+
+/* Price card hover — desktop only */
+@media (hover: hover) {
+  .price-card-hover:hover {
+    border-color: rgba(232, 37, 167, 0.4);
+    background: rgba(255, 255, 255, 0.08);
+    box-shadow: 0 8px 30px rgba(232, 37, 167, 0.12);
+  }
 }
 
 /* WhatsApp button pulse */

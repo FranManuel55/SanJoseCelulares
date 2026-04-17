@@ -188,7 +188,7 @@ export default function Contact() {
           <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-brand-pink/5">
             {/* Map glow decoration */}
             <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-96 h-20 bg-brand-pink/10 rounded-full blur-3xl pointer-events-none" />
-            
+
             <div className="relative">
               {/* Header bar */}
               <div className="flex items-center gap-3 px-5 py-3 bg-white/5 border-b border-white/10">

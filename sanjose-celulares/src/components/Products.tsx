@@ -108,7 +108,7 @@ export default function Products() {
               </p>
 
               {/* Hover arrow */}
-              <div className="mt-5 flex items-center gap-2 text-brand-pink font-semibold text-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <div className="mt-5 flex items-center gap-2 text-brand-pink font-semibold text-sm opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
                 <a href="#precios">Ver precios</a>
                 <motion.span
                   className="inline-block"
