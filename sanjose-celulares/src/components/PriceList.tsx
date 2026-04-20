@@ -15,6 +15,7 @@ interface Product {
 
 const ITEMS_PER_PAGE = 12;
 
+// Updated timestamp to force refresh
 /**
  * Converts a Google Drive sharing link to a direct thumbnail URL.
  * Input:  https://drive.google.com/file/d/FILE_ID/view?usp=drive_link
