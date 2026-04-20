@@ -44,7 +44,7 @@ export default function PriceList() {
     const fetchPrices = async () => {
       try {
         const response = await fetch(
-          `https://docs.google.com/spreadsheets/d/1bE2Y0FgTQc5w1n9cBeypLSuqxyjvxuKg7fFVyTMSV_k/export?format=csv&t=${new Date().getTime()}`,
+          `https://docs.google.com/spreadsheets/d/e/2PACX-1vSYwgBsRjSHcZ0vZXSk9e7ppXjTBPkLXsvmdeixTD8g3jWKIcJ1fkHJU3f4uFBnVEL6i0R9aIEVOcgw/pub?output=csv&t=${new Date().getTime()}`,
           { cache: "no-store" }
         );
         const text = await response.text();
