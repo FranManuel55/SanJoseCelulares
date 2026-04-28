@@ -39,8 +39,8 @@ export default function Navbar() {
           <div className="flex items-center justify-between">
             {/* Logo */}
             <a href="#inicio" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl animated-gradient flex items-center justify-center shadow-lg shadow-brand-pink/30 group-hover:shadow-brand-pink/50 transition-shadow duration-300">
-                <span className="text-white font-bold text-lg sm:text-xl">SJ</span>
+              <div className="w-10 h-10 sm:w-12 sm:h-12 flex items-center justify-center">
+                <img src="/logo.svg" alt="San José Celulares" className="w-full h-full object-contain drop-shadow-md rounded-2xl" />
               </div>
               <div className="hidden sm:block">
                 <p className="font-bold text-brand-black text-lg leading-tight">

@@ -35,8 +35,8 @@ export default function Footer() {
           {/* Brand column */}
           <div className="lg:col-span-2">
             <a href="#inicio" className="flex items-center gap-3 mb-5">
-              <div className="w-12 h-12 rounded-xl animated-gradient flex items-center justify-center shadow-lg shadow-brand-pink/30">
-                <span className="text-white font-bold text-xl">SJ</span>
+              <div className="w-12 h-12 flex items-center justify-center">
+                <img src="/logo.svg" alt="San José Celulares" className="w-full h-full object-contain drop-shadow-md rounded-2xl" />
               </div>
               <div>
                 <p className="font-bold text-lg leading-tight">San José</p>
