@@ -76,8 +76,9 @@ export default function Contact() {
                 </div>
                 <div>
                   <p className="text-white/40 text-sm">Horario de atención</p>
-                  <p className="text-white font-semibold">
-                    Lun - Sáb: 9:00 - 20:00
+                  <p className="text-white font-semibold text-sm">
+                    Lun a Vie: 9:00 a 13:00 - 16:30 a 20:30 <br />
+                    Sáb: 9:30 a 13:00 - 17:00 a 20:30
                   </p>
                 </div>
               </div>

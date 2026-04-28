@@ -350,9 +350,9 @@ export default function PriceList() {
                     {/* Condition badge overlay */}
                     <div className="absolute top-3 right-3">
                       <span
-                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider backdrop-blur-sm ${product.condition.toUpperCase() === "NUEVO"
-                            ? "bg-green-500/20 text-green-400 border border-green-500/20"
-                            : "bg-brand-pink/20 text-brand-pink border border-brand-pink/20"
+                        className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-md ${product.condition.toUpperCase() === "NUEVO"
+                            ? "bg-green-600 text-white"
+                            : "bg-brand-pink text-white"
                           }`}
                       >
                         <Sparkles size={10} />
